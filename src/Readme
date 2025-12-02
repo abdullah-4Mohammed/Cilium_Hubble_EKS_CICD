@@ -1,0 +1,67 @@
+# Three-Tier Application Deployment with Cilium & Hubble on Amazon EKS
+
+## Overview
+
+This project demonstrates the deployment of a three-tier application on Amazon EKS (Elastic Kubernetes Service) with Cilium CNI and Hubble for advanced networking and observability. The application consists of a frontend, backend, and MongoDB database, all containerized with Docker and managed through Kubernetes.
+
+## Application Components
+
+### Frontend
+A Vue.js application hosted on NGINX, served as a static site. The frontend communicates with the backend through REST APIs.
+
+### Backend
+A RESTful API built with Nest.js, running on port 3001. The backend service is deployed in the backend-check namespace within the Kubernetes cluster.
+
+### MongoDB
+A MongoDB service running in the Kubernetes cluster, providing persistent data storage for the application.
+
+## Infrastructure and Pipeline
+
+### Terraform
+Used for infrastructure as code (IaC) to manage and provision AWS resources, including EKS clusters and associated services. Terraform handles the setup of VPC, security groups, and IAM roles necessary for the deployment.
+
+### Azure DevOps
+Handles the continuous integration (CI) and continuous deployment (CD) pipeline. The pipeline automates the process of building Docker images for the frontend, backend, and MongoDB services, pushing them to Amazon ECR (Elastic Container Registry), and deploying them to EKS.
+
+## Networking with Cilium
+
+### Cilium CNI
+Cilium is used as the Container Network Interface plugin for the EKS cluster, providing eBPF-based networking for high performance and advanced security capabilities. Cilium enables efficient packet processing and supports Layer 3 through Layer 7 network policies.
+
+### Network Policies
+The deployment utilizes Cilium's network policy capabilities to control traffic between services, ensuring secure communication within the cluster and implementing network segmentation.
+
+## Observability with Hubble
+
+### Hubble
+Hubble is deployed alongside Cilium to provide comprehensive network observability. It captures and visualizes network flows, enabling real-time monitoring of service-to-service communications within the cluster.
+
+### Network Monitoring
+Hubble provides visibility into DNS queries, HTTP/HTTPS traffic, and network policy enforcement. This enables troubleshooting, performance analysis, and security monitoring across all application components.
+
+## Key Technologies
+
+- **Docker**: Container runtime for building and packaging applications
+- **Kubernetes (EKS)**: Container orchestration platform on AWS
+- **Cilium**: eBPF-based CNI plugin for networking and security
+- **Hubble**: Network observability platform built on Cilium
+- **NGINX Ingress**: Traffic routing and load balancing for HTTP/HTTPS requests
+- **Cloudflare DNS**: External DNS routing for the domain wbapp.test.dv
+- **Terraform**: Infrastructure provisioning and management
+- **Azure DevOps**: CI/CD pipeline automation
+- **Amazon ECR**: Docker image registry for storing container images
+
+## Deployment Architecture
+
+### Ingress Configuration
+NGINX Ingress Controller is configured to route traffic from the external domain (wbapp.test.dv) to the appropriate backend services. An AWS Load Balancer is provisioned to handle incoming traffic and distribute it to the ingress controller.
+
+### DNS Routing
+Cloudflare DNS is configured to point the domain wbapp.test.dv to the AWS Load Balancer, enabling external access to the application.
+
+### Service Communication
+The frontend service communicates with the backend API, which in turn connects to MongoDB. All communication is managed through Kubernetes services with Cilium handling the underlying networking.
+
+## Environment Variables
+
+**VUE_APP_API_URL**: Dynamically set via Kubernetes Deployment, used by the frontend application to determine the backend API endpoint for communication.
