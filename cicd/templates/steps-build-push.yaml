@@ -1,13 +1,12 @@
 steps:
 - task: Docker@2
-  displayName: Build Docker image
+  displayName: Build backend contgainer
   inputs:
-    repository: $(imageRepository)/wbapp
+    repository: $(imageRepository)/backend
     command: build
-    dockerfile: $(dockerFile)
+    dockerfile: $(dockerFile_Backend)
     tags: |
       $(Build.BuildId)
-      latest
 
 - script: |
     set -ex
@@ -16,15 +15,15 @@ steps:
   displayName: 'Display image name'
 
 - task: ECRPushImage@1
-  displayName: Push to ECR
+  displayName: Push backend to ECR
   inputs:
     awsCredentials: $(awsConnection)
     regionName: $(region)
     imageSource: 'imagename'
-    sourceImageName: '$(imageRepository)/wbapp'
+    sourceImageName: '$(imageRepository)/backend'
     sourceImageTag: '$(Build.BuildId)'   
     repositoryName: $(imageRepository)
-    pushTag: "wbapp-$(Build.BuildId)"
+    pushTag: "backend-$(Build.BuildId)"
 
 - task: ECRPushImage@1
   displayName: Push to ECR 'latest' tag
@@ -32,9 +31,45 @@ steps:
     awsCredentials: $(awsConnection)
     regionName: $(region)
     imageSource: 'imagename'
-    sourceImageName: '$(imageRepository)/wbapp'
+    sourceImageName: '$(imageRepository)/backend'
     sourceImageTag: '$(Build.BuildId)'   
     repositoryName: $(imageRepository)
-    pushTag: latest
+    pushTag: backend-latest
 
- 
+#frontend
+- task: Docker@2
+  displayName: Build frontend Docker image
+  inputs:
+    repository: $(imageRepository)/frontend
+    command: build
+    dockerfile: $(dockerFile_Frontend)
+    tags: |
+      $(Build.BuildId)
+
+- script: |
+    set -ex
+    docker images
+    echo "buildid $(Build.BuildId)"
+  displayName: 'Display image name'
+
+- task: ECRPushImage@1
+  displayName: Push fronetend to ECR
+  inputs:
+    awsCredentials: $(awsConnection)
+    regionName: $(region)
+    imageSource: 'imagename'
+    sourceImageName: '$(imageRepository)/frontend'
+    sourceImageTag: '$(Build.BuildId)'   
+    repositoryName: $(imageRepository)
+    pushTag: "frontend-$(Build.BuildId)"
+
+- task: ECRPushImage@1
+  displayName: Push to ECR 'latest' tag
+  inputs:
+    awsCredentials: $(awsConnection)
+    regionName: $(region)
+    imageSource: 'imagename'
+    sourceImageName: '$(imageRepository)/frontend'
+    sourceImageTag: '$(Build.BuildId)'  
+    repositoryName: $(imageRepository)
+    pushTag: frontend-latest
